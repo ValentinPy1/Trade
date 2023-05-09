@@ -5,8 +5,7 @@ __version__ = "1.0"
 
 import sys
 import numpy as np
-from Api.BotState import BotState
-import matplotlib.pyplot as plt
+from Api.trade import BotState
 
 class Bot:
     def __init__(self):
@@ -81,9 +80,3 @@ class Bot:
 if __name__ == "__main__":
     mybot = Bot()
     mybot.run()
-    history = np.array(mybot.history)
-    plt.plot(history[:, 0], label="opening_price")
-    plt.plot(history[:, 1], label="short_ema")
-    plt.plot(history[:, 2], label="long_ema")
-    plt.legend()
-    plt.show()

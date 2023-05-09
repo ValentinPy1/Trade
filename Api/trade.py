@@ -3,8 +3,48 @@
 """ Python starter bot for the Crypto Trader games, from ex-Riddles.io """
 __version__ = "1.0"
 
-from Api.Candle import Candle
-from Api.Chart import Chart
+class Candle:
+    def __init__(self, format, intel):
+        tmp = intel.split(",")
+        for (i, key) in enumerate(format):
+            value = tmp[i]
+            if key == "pair":
+                self.pair = value
+            if key == "date":
+                self.date = int(value)
+            if key == "high":
+                self.high = float(value)
+            if key == "low":
+                self.low = float(value)
+            if key == "open":
+                self.open = float(value)
+            if key == "close":
+                self.close = float(value)
+            if key == "volume":
+                self.volume = float(value)
+
+    def __repr__(self):
+        return str(self.pair) + str(self.date) + str(self.close) + str(self.volume)
+
+
+class Chart:
+    def __init__(self):
+        self.dates = []
+        self.opens = []
+        self.highs = []
+        self.lows = []
+        self.closes = []
+        self.volumes = []
+        self.indicators = {}
+
+    def add_candle(self, candle: Candle):
+        self.dates.append(candle.date)
+        self.opens.append(candle.open)
+        self.highs.append(candle.high)
+        self.lows.append(candle.low)
+        self.closes.append(candle.close)
+        self.volumes.append(candle.volume)
+
 
 class BotState:
     def __init__(self):
@@ -62,14 +102,13 @@ class BotState:
                 stack_infos = stack_str.strip().split(":")
                 self.update_stack(stack_infos[0], float(stack_infos[1]))
 
-    def update(self, info: str):
-        tmp = info.split(" ")
-        if tmp[0] == "settings":
-            self.update_settings(tmp[1], tmp[2])
+    def update(self, input : str):
+        input = input.split(" ")
+        if input[0] == "update":
+            self.update_game(input[2], input[3])
             return True
-        if tmp[0] == "update":
-            if tmp[1] == "game":
-                self.update_game(tmp[2], tmp[3])
-                return True
-        if tmp[0] == "action":
-            return False
+        if input[0] == "settings":
+            self.update_settings(input[1], input[2])
+            return True
+        return False
+

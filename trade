@@ -1,3 +1,3 @@
 #!bin/bash
 
-python3 my_bots/test_bot1.py
+python3 test_bot1.py
