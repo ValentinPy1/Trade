@@ -14,10 +14,10 @@ file = "training_set-new_set.csv"
 def main(se_factor, le_factor):
     df = pd.read_csv(file)
     prices = df["close"].values
-    short_ema = prices[0]
-    long_ema = prices[0]
+    short_ema = prices[-1]
+    long_ema = prices[-1]
     history = []
-    for i in range(1, len(prices)):
+    for i in range(len(prices) - 1, 0, -1):
         short_ema = short_ema * (1 - se_factor) + prices[i] * se_factor
         long_ema = long_ema * (1 - le_factor) + prices[i] * le_factor
         prices[i] = prices[i]

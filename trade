@@ -1,3 +1,2 @@
-#!bin/bash
-
-python3 test_bot1.py
+#!/bin/bash
+python3 Bots/double_ema.py
