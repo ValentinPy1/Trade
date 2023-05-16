@@ -1,50 +1,27 @@
-#!/usr/bin/python3
-# -*- coding: iso-8859-1 -*
-""" Python starter bot for the Crypto Trader games, from ex-Riddles.io """
-__version__ = "1.0"
+##
+## EPITECH PROJECT, 2022
+## Trade
+## File description:
+## pandas_botstates.py
+##
+
+import pandas as pd
 
 class Candle:
     def __init__(self, format, intel):
         tmp = intel.split(",")
+        self.data = {}
         for (i, key) in enumerate(format):
             value = tmp[i]
-            if key == "pair":
-                self.pair = value
-            if key == "date":
-                self.date = int(value)
-            if key == "high":
-                self.high = float(value)
-            if key == "low":
-                self.low = float(value)
-            if key == "open":
-                self.open = float(value)
-            if key == "close":
-                self.close = float(value)
-            if key == "volume":
-                self.volume = float(value)
+            if key == 'pair':
+                self.data[key] = value
+            elif key == 'date':
+                self.data[key] = int(value)
+            else:
+                self.data[key] = float(value)
 
     def __repr__(self):
-        return str(self.pair) + str(self.date) + str(self.close) + str(self.volume)
-
-
-class Chart:
-    def __init__(self):
-        self.dates = []
-        self.opens = []
-        self.highs = []
-        self.lows = []
-        self.closes = []
-        self.volumes = []
-        self.indicators = {}
-
-    def add_candle(self, candle: Candle):
-        self.dates.append(candle.date)
-        self.opens.append(candle.open)
-        self.highs.append(candle.high)
-        self.lows.append(candle.low)
-        self.closes.append(candle.close)
-        self.volumes.append(candle.volume)
-
+        return str(self.data)
 
 class BotState:
     def __init__(self):
@@ -59,13 +36,11 @@ class BotState:
         self.transactionFee = 0.1
         self.date = 0
         self.stacks = dict()
-        self.charts = dict()
+        self.data = pd.DataFrame(columns=["date", "open", "high", "low", "close", "volume"])
 
-    def update_chart(self, pair: str, new_candle_str: str):
-        if not (pair in self.charts):
-            self.charts[pair] = Chart()
-        new_candle_obj = Candle(self.candleFormat, new_candle_str)
-        self.charts[pair].add_candle(new_candle_obj)
+    def update_chart(self, new_candle_str: str):
+        new_candle = Candle(self.candleFormat, new_candle_str)
+        self.data = self.data.append(new_candle.data, ignore_index=True)
 
     def update_stack(self, key: str, value: float):
         self.stacks[key] = value
@@ -91,11 +66,7 @@ class BotState:
 
     def update_game(self, key: str, value: str):
         if key == "next_candles":
-            new_candles = value.split(";")
-            self.date = int(new_candles[0].split(",")[1])
-            for candle_str in new_candles:
-                candle_infos = candle_str.strip().split(",")
-                self.update_chart(candle_infos[0], candle_str)
+            self.update_chart(value)
         if key == "stacks":
             new_stacks = value.split(",")
             for stack_str in new_stacks:
@@ -104,11 +75,13 @@ class BotState:
 
     def update(self, input : str):
         input = input.split(" ")
-        if input[0] == "update":
-            self.update_game(input[2], input[3])
-            return 'update'
         if input[0] == "settings":
             self.update_settings(input[1], input[2])
             return 'settings'
+        if input[0] == "update":
+            self.update_game(input[2], input[3])
+            return 'update'
         return 'action'
 
+    def get_candle(self, index):
+        return self.data.iloc[index]

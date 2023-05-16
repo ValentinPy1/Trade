@@ -5,7 +5,7 @@ __version__ = "1.0"
 
 import sys
 import numpy as np
-from Api.trade import BotState
+from botstates import BotState
 
 class Bot:
     def __init__(self, args):
@@ -24,8 +24,8 @@ class Bot:
         self.history = []
 
     def update_ema(self):
-        self.opening_price = self.botState.charts["USDT_BTC"].opens[-1]
-        self.closing_price = self.botState.charts["USDT_BTC"].closes[-1]
+        self.opening_price = self.botState.get_candle(-1)['open']
+        self.closing_price = self.botState.get_candle(-1)['close']
         if self.short_ema == 0:
             self.short_ema = self.closing_price
             self.long_ema = self.closing_price
