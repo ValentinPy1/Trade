@@ -24,6 +24,8 @@ class Bot:
         self.history = []
 
     def update_ema(self):
+        self.opening_price = self.botState.charts["USDT_BTC"].opens[-1]
+        self.closing_price = self.botState.charts["USDT_BTC"].closes[-1]
         if self.short_ema == 0:
             self.short_ema = self.closing_price
             self.long_ema = self.closing_price
@@ -31,7 +33,7 @@ class Bot:
             self.short_ema = self.short_ema * (1 - 2 / (self.args["short_ema_period"] + 1)) + self.closing_price * 2 / (self.args["short_ema_period"] + 1)
             self.long_ema = self.long_ema * (1 - 2 / (self.args["long_ema_period"] + 1)) + self.closing_price * 2 / (self.args["long_ema_period"] + 1)
         self.history.append({
-            "opening_price": self.closing_price,
+            "closing_price": self.closing_price,
             "short_ema": self.short_ema,
             "long_ema": self.long_ema
         })
@@ -39,8 +41,6 @@ class Bot:
     def update(self):
         self.dollars = self.botState.stacks["USDT"]
         self.bitcoins = self.botState.stacks["BTC"]
-        self.opening_price = self.botState.charts["USDT_BTC"].opens[-1]
-        self.closing_price = self.botState.charts["USDT_BTC"].closes[-1]
         self.btc_affordable = self.dollars / self.closing_price
 
     def run(self):
@@ -48,29 +48,31 @@ class Bot:
             reading = input()
             if len(reading) == 0:
                 continue
-            if self.botState.update(reading):
+            state = self.botState.update(reading)
+            if state == 'update':
                 self.update_ema()
                 continue
-            self.update()
-            self.take_action()
+            elif state == 'action':
+                self.update()
+                self.take_action()
 
     def buy(self):
         if self.dollars == 0:
-            print("Balance: ", self.dollars, self.bitcoins, file=sys.stderr, flush=True)
+            # print("Balance: ", self.dollars, self.bitcoins, file=sys.stderr, flush=True)
             print("no_moves", flush=True)
             return
         print(f'buy USDT_BTC {self.btc_affordable * self.args["capital_invested"]}', flush=True)
         self.last_action = 0
-        print(f'buy USDT_BTC {self.btc_affordable * self.args["capital_invested"]}', file=sys.stderr, flush=True)
+        # print(f'buy USDT_BTC {self.btc_affordable * self.args["capital_invested"]}', file=sys.stderr, flush=True)
 
     def sell(self):
         if self.bitcoins == 0:
-            print("Balance: ", self.dollars, self.bitcoins, file=sys.stderr, flush=True)
+            # print("Balance: ", self.dollars, self.bitcoins, file=sys.stderr, flush=True)
             print("no_moves", flush=True)
             return
         print(f'sell USDT_BTC {self.bitcoins * self.args["capital_invested"]}', flush=True)
         self.last_action = 0
-        print(f'sell USDT_BTC {self.bitcoins * self.args["capital_invested"]}', file=sys.stderr, flush=True)
+        # print(f'sell USDT_BTC {self.bitcoins * self.args["capital_invested"]}', file=sys.stderr, flush=True)
 
     def take_action(self):
         if self.last_action < self.args["action_interval"]:

@@ -106,9 +106,9 @@ class BotState:
         input = input.split(" ")
         if input[0] == "update":
             self.update_game(input[2], input[3])
-            return True
+            return 'update'
         if input[0] == "settings":
             self.update_settings(input[1], input[2])
-            return True
-        return False
+            return 'settings'
+        return 'action'
 
